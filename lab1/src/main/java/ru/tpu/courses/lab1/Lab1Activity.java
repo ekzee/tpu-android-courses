@@ -22,7 +22,8 @@ public class Lab1Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Метод setTitle используется для задания заголовка в тулбаре
-        // Метод getString достаёт из ресурсов  с параметрами умеет форматировать строки по аналогии с
+        // Метод getString с параметрами достаёт строку из ресурсов и форматирует её по правилам
+        // https://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html
         setTitle(getString(R.string.lab1_title, getClass().getSimpleName()));
     }
 }
