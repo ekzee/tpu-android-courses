@@ -1,0 +1,7 @@
+apply from: rootProject.file('feature.gradle')
+
+android.resourcePrefix 'lab2_'
+
+dependencies {
+	implementation "androidx.appcompat:appcompat:$appcompat"
+}

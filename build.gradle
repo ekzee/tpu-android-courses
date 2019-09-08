@@ -1,0 +1,44 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    // Задаём переменные общие для всего проекта
+    ext {
+        versionCode = 1
+        versionName = '1.0.0'
+
+        minSdk = 16
+        compileSdk = 28
+    }
+
+    // Репозитории, в которых необходимо искать зависимости
+    repositories {
+        google()
+        jcenter()
+        
+    }
+    // Зависимости для билд скрипта
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.0'
+        
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+// Версии используемых библиотек
+ext {
+    appcompat = '1.1.0'
+    recyclerview = '1.0.0'
+    material = '1.0.0'
+}

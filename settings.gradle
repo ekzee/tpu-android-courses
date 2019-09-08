@@ -1,0 +1,2 @@
+include ':app', ':lab1', ':lab2', ':lab3'
+rootProject.name='TPU Android'

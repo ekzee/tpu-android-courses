@@ -1,0 +1,40 @@
+// Общий файл для всех библиотек, подключается в build.gradle каждого помодуля.
+
+// Говорит билд системе, что используемый модуль - это android библиотека
+apply plugin: 'com.android.library'
+
+// Настройки android плагина
+android {
+	// Версия SDK, используемая при компиляции
+	compileSdkVersion compileSdk
+
+	defaultConfig {
+		// Минимально поддерживаемая версия Android
+		minSdkVersion minSdk
+		// Целевая SDK, используется системой для обратной совместимости при внедрении в ОС новых фич.
+		targetSdkVersion compileSdk
+		// Номер версии приложения, используется системой для обновления приложения
+		versionCode rootProject.versionCode
+		// Версия приложения, которую видит пользователь
+		versionName rootProject.versionName
+	}
+
+	// Типы сборки
+	buildTypes {
+		// Для релизной версии обычно настраивается обфускация приложения, для защиты от реверс инженеринга
+		release {
+			minifyEnabled true
+			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+				'proguard-rules.pro'
+		}
+		// Только для debug сборок включен debug, также обфускация не выполняется, чтобы не замедлять время компиляции
+		debug {
+			minifyEnabled false
+		}
+	}
+	// Необходимо для поддержки Java 8 на старых версиях андроида
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_1_8
+		targetCompatibility JavaVersion.VERSION_1_8
+	}
+}

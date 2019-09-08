@@ -1,0 +1,9 @@
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	package="ru.tpu.courses.lab1"
+	>
+
+	<application>
+		<activity android:name=".Lab1Activity" />
+	</application>
+</manifest>

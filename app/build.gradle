@@ -1,0 +1,40 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion compileSdk
+    defaultConfig {
+        applicationId "ru.tpu.courses.android"
+
+        minSdkVersion minSdk
+        targetSdkVersion compileSdk
+
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+}
+
+dependencies {
+
+    // Подключаем модули с лабораторными работами
+    implementation project(':lab1')
+    implementation project(':lab2')
+    implementation project(':lab3')
+
+    implementation "androidx.appcompat:appcompat:$appcompat"
+}

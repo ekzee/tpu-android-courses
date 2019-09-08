@@ -1,0 +1,4 @@
+<resources>
+    <string name="lab2_title">Я %s!</string>
+    <string name="lab2_btn_add_view">Нажми меня!</string>
+</resources>

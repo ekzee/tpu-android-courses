@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Контейнер, который распределяет содержащиеся внутри него View равномерно по вертикали или горизонтали
+    (в зависимости от значения атрибута orientation)
+    - xmlns:android - должен быть всегда указан у корневого элемента, содержит xml схему
+    - layout_width и layout_height - должны быть указаны у каждого View, отражают соответственно ширину и высоту.
+        Могут принимать значения:
+        - match_parent(растянуть до размера родителя)
+        - wrap_content(занять ровно столько место, сколько необходимо содержимому)
+        - число в указанных единицах измерения. Для View обычно используется dp, подробнее о
+        поддерживаемых единицах измерения - https://stackoverflow.com/a/2025541/2692207
+    - gravity - определяет выравнивание элементов
+ -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <!--
+    Кнопка! Из примечательного только атрибут id, который необходим для взаимодействия с ней
+    в коде (см. MainActivity)
+    -->
+    <Button
+        android:id="@+id/lab1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="lab1" />
+
+    <Button
+        android:id="@+id/lab2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="lab2" />
+
+    <Button
+        android:id="@+id/lab3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="lab3" />
+
+    <Button
+        android:id="@+id/lab4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="lab4" />
+
+    <Button
+        android:id="@+id/lab5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="lab5" />
+
+    <Button
+        android:id="@+id/lab6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="lab6" />
+
+</LinearLayout>
