@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_add_photo"
+        android:icon="@drawable/lab4_ic_add_a_photo_white_24dp"
+        android:title="@string/lab4_action_add_photo"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_save"
+        android:icon="@drawable/lab4_ic_done_white_24dp"
+        android:title="@string/lab4_action_save"
+        app:showAsAction="always" />
+</menu>
+

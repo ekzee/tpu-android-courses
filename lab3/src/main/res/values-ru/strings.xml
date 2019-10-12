@@ -4,5 +4,7 @@
     <string name="lab3_first_name">Имя</string>
     <string name="lab3_second_name">Отчество</string>
     <string name="lab3_last_name">Фамилия</string>
+    <string name="lab3_action_save">Сохранить</string>
+
     <string name="lab3_error_already_exists">Такой студент уже существует</string>
 </resources>
