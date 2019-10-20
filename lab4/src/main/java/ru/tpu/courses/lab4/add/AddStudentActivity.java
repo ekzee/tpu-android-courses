@@ -1,15 +1,13 @@
-package ru.tpu.courses.lab4;
+package ru.tpu.courses.lab4.add;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +21,6 @@ import androidx.core.content.FileProvider;
 import androidx.exifinterface.media.ExifInterface;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,14 +28,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import ru.tpu.courses.lab4.Const;
+import ru.tpu.courses.lab4.R;
+import ru.tpu.courses.lab4.db.Lab4Database;
+import ru.tpu.courses.lab4.db.Student;
+import ru.tpu.courses.lab4.db.StudentDao;
+
 public class AddStudentActivity extends AppCompatActivity {
 
     private static final String EXTRA_STUDENT = "student";
-
-    private static final String PREF_FIRST_NAME = "first_name";
-    private static final String PREF_SECOND_NAME = "second_name";
-    private static final String PREF_LAST_NAME = "last_name";
-    private static final String PREF_PHOTO_PATH = "photo_path";
 
     private static final int REQUEST_CAMERA = 0;
 
@@ -50,7 +48,7 @@ public class AddStudentActivity extends AppCompatActivity {
         return intent.getParcelableExtra(EXTRA_STUDENT);
     }
 
-    private final StudentsCache studentsCache = StudentsCache.getInstance();
+    private TempStudentPref studentPref;
 
     private EditText firstName;
     private EditText secondName;
@@ -66,6 +64,8 @@ public class AddStudentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lab4_activity_add_student);
 
+        studentPref = new TempStudentPref(this);
+
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -74,11 +74,10 @@ public class AddStudentActivity extends AppCompatActivity {
         lastName = findViewById(R.id.last_name);
         photo = findViewById(R.id.photo);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        firstName.setText(prefs.getString(PREF_FIRST_NAME, ""));
-        secondName.setText(prefs.getString(PREF_SECOND_NAME, ""));
-        lastName.setText(prefs.getString(PREF_LAST_NAME, ""));
-        photoPath = prefs.getString(PREF_PHOTO_PATH, null);
+        firstName.setText(studentPref.getFirstName());
+        secondName.setText(studentPref.getSecondName());
+        lastName.setText(studentPref.getLastName());
+        photoPath = studentPref.getPhotoPath();
         if (photoPath != null) {
             photo.setImageURI(Uri.parse(photoPath));
         }
@@ -88,7 +87,12 @@ public class AddStudentActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if (!skipSaveToPrefs) {
-            saveInfoInPrefs();
+            studentPref.set(
+                    firstName.getText().toString(),
+                    secondName.getText().toString(),
+                    lastName.getText().toString(),
+                    photoPath
+            );
         }
     }
 
@@ -109,15 +113,19 @@ public class AddStudentActivity extends AppCompatActivity {
                     firstName.getText().toString(),
                     secondName.getText().toString(),
                     lastName.getText().toString(),
-                    null
+                    photoPath
             );
 
-            if (studentsCache.contains(student)) {
+            StudentDao studentDao = Lab4Database.getInstance(this).studentDao();
+
+            if (studentDao.count(student.firstName, student.secondName, student.lastName) > 0) {
                 Toast.makeText(this, R.string.lab4_error_already_exists, Toast.LENGTH_LONG).show();
                 return true;
             }
 
             skipSaveToPrefs = true;
+
+            studentPref.clear();
 
             Intent data = new Intent();
             data.putExtra(EXTRA_STUDENT, student);
@@ -150,7 +158,6 @@ public class AddStudentActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
-            photo.setImageURI(Uri.parse(photoPath));
             try {
                 Bitmap scaledPhoto = getScaledBitmap(photoPath, 512, 512);
                 scaledPhoto = rotateBitmapIfNeed(scaledPhoto, photoPath);
@@ -166,16 +173,6 @@ public class AddStudentActivity extends AppCompatActivity {
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private void saveInfoInPrefs() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.edit()
-                .putString(PREF_FIRST_NAME, firstName.getText().toString())
-                .putString(PREF_LAST_NAME, lastName.getText().toString())
-                .putString(PREF_SECOND_NAME, secondName.getText().toString())
-                .putString(PREF_PHOTO_PATH, photoPath)
-                .apply();
     }
 
     private Intent requestPhotoIntent(Uri photoFile) {

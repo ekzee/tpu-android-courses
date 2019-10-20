@@ -8,7 +8,7 @@
 
 	<application>
 		<activity android:name=".Lab4Activity" />
-		<activity android:name=".AddStudentActivity" />
+		<activity android:name=".add.AddStudentActivity" />
 
 		<provider
 			android:name="androidx.core.content.FileProvider"
@@ -17,7 +17,7 @@
 			android:grantUriPermissions="true">
 			<meta-data
 				android:name="android.support.FILE_PROVIDER_PATHS"
-				android:resource="@xml/photo_path"
+				android:resource="@xml/lab4_photo_path"
 				/>
 		</provider>
 	</application>

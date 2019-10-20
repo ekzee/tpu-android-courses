@@ -1,5 +1,8 @@
 package ru.tpu.courses.lab4.adapter;
 
+import android.net.Uri;
+import android.text.TextUtils;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -8,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.tpu.courses.lab4.Student;
+import ru.tpu.courses.lab4.db.Student;
 
 public class StudentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -39,8 +42,17 @@ public class StudentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case TYPE_STUDENT:
                 StudentHolder studentHolder = (StudentHolder) holder;
                 Student student = students.get(position / 2);
+
                 studentHolder.student.setText(student.lastName + " " + student.firstName
                         + " " + student.secondName);
+
+                if (!TextUtils.isEmpty(student.photoPath)) {
+                    studentHolder.photo.setVisibility(View.VISIBLE);
+                    studentHolder.photo.setImageURI(Uri.parse(student.photoPath));
+                } else {
+                    studentHolder.photo.setVisibility(View.GONE);
+                    studentHolder.photo.setImageURI(null);
+                }
                 break;
         }
     }

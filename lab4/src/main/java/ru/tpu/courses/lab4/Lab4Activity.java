@@ -11,8 +11,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import ru.tpu.courses.lab4.R;
 import ru.tpu.courses.lab4.adapter.StudentsAdapter;
+import ru.tpu.courses.lab4.add.AddStudentActivity;
+import ru.tpu.courses.lab4.db.Lab4Database;
+import ru.tpu.courses.lab4.db.Student;
+import ru.tpu.courses.lab4.db.StudentDao;
 
 /**
  * <b>RecyclerView, взаимодействие между экранами. Memory Cache.</b>
@@ -25,7 +28,7 @@ public class Lab4Activity extends AppCompatActivity {
         return new Intent(context, Lab4Activity.class);
     }
 
-    private final StudentsCache studentsCache = StudentsCache.getInstance();
+    private StudentDao studentDao;
 
     private RecyclerView list;
     private FloatingActionButton fab;
@@ -35,6 +38,8 @@ public class Lab4Activity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        studentDao = Lab4Database.getInstance(this).studentDao();
 
         setTitle(getString(R.string.lab4_title, getClass().getSimpleName()));
 
@@ -46,7 +51,7 @@ public class Lab4Activity extends AppCompatActivity {
         list.setLayoutManager(layoutManager);
 
         list.setAdapter(studentsAdapter = new StudentsAdapter());
-        studentsAdapter.setStudents(studentsCache.getStudents());
+        studentsAdapter.setStudents(studentDao.getAll());
 
         fab.setOnClickListener(
                 v -> startActivityForResult(
@@ -62,9 +67,9 @@ public class Lab4Activity extends AppCompatActivity {
         if (requestCode == REQUEST_STUDENT_ADD && resultCode == RESULT_OK) {
             Student student = AddStudentActivity.getResultStudent(data);
 
-            studentsCache.addStudent(student);
+            studentDao.insert(student);
 
-            studentsAdapter.setStudents(studentsCache.getStudents());
+            studentsAdapter.setStudents(studentDao.getAll());
             studentsAdapter.notifyItemRangeInserted(studentsAdapter.getItemCount() - 2, 2);
             list.scrollToPosition(studentsAdapter.getItemCount() - 1);
         }

@@ -1,21 +1,30 @@
-package ru.tpu.courses.lab4;
+package ru.tpu.courses.lab4.db;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.util.ObjectsCompat;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
+@Entity
 public class Student implements Parcelable {
 
+    @PrimaryKey(autoGenerate = true)
+    public int id;
     @NonNull
+    @ColumnInfo(name = "first_name")
     public String firstName;
     @NonNull
+    @ColumnInfo(name = "second_name")
     public String secondName;
     @NonNull
+    @ColumnInfo(name = "last_name")
     public String lastName;
     @Nullable
+    @ColumnInfo(name = "photo_path")
     public String photoPath;
 
     public Student(
@@ -31,6 +40,7 @@ public class Student implements Parcelable {
     }
 
     protected Student(Parcel in) {
+        id = in.readInt();
         firstName = in.readString();
         secondName = in.readString();
         lastName = in.readString();
@@ -56,25 +66,10 @@ public class Student implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
         dest.writeString(firstName);
         dest.writeString(secondName);
         dest.writeString(lastName);
         dest.writeString(photoPath);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Student)) return false;
-        Student student = (Student) o;
-        return firstName.equals(student.firstName) &&
-                secondName.equals(student.secondName) &&
-                lastName.equals(student.lastName) &&
-                ObjectsCompat.equals(photoPath, student.photoPath);
-    }
-
-    @Override
-    public int hashCode() {
-        return ObjectsCompat.hash(firstName, secondName, lastName, photoPath);
     }
 }
