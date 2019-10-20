@@ -35,6 +35,7 @@ dependencies {
     implementation project(':lab1')
     implementation project(':lab2')
     implementation project(':lab3')
+    implementation project(':lab4')
 
     implementation "androidx.appcompat:appcompat:$appcompat"
 }

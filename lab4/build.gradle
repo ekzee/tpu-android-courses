@@ -1,0 +1,15 @@
+apply from: rootProject.file('feature.gradle')
+
+android.resourcePrefix 'lab4_'
+
+dependencies {
+
+	implementation "androidx.appcompat:appcompat:$appcompat"
+	implementation "androidx.recyclerview:recyclerview:$recyclerview"
+	implementation "com.google.android.material:material:$material"
+
+	implementation "androidx.room:room-runtime:$room"
+	annotationProcessor "androidx.room:room-compiler:$room"
+
+	implementation 'androidx.exifinterface:exifinterface:1.1.0-beta01'
+}

@@ -1,0 +1,12 @@
+<resources>
+    <string name="lab4_title">Я %s!</string>
+
+    <string name="lab4_first_name">Имя</string>
+    <string name="lab4_second_name">Отчество</string>
+    <string name="lab4_last_name">Фамилия</string>
+
+    <string name="lab4_action_add_photo">Добавить фото</string>
+    <string name="lab4_action_save">Сохранить</string>
+
+    <string name="lab4_error_already_exists">Такой студент уже существует</string>
+</resources>

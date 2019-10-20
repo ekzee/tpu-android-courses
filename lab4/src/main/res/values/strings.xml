@@ -1,0 +1,12 @@
+<resources>
+    <string name="lab4_title">I\'m %s!</string>
+
+    <string name="lab4_first_name">First name</string>
+    <string name="lab4_second_name">Second name</string>
+    <string name="lab4_last_name">Last name</string>
+
+    <string name="lab4_action_save">Save</string>
+    <string name="lab4_action_add_photo">Add photo</string>
+
+    <string name="lab4_error_already_exists">The student already exists</string>
+</resources>
