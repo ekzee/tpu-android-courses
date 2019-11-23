@@ -11,7 +11,9 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
+        // region lab3
         StudentsCache studentsCache = StudentsCache.getInstance();
         studentsCache.addStudent(new Student("Хардкод", "Хардкодович", "Хардкодов"));
+        // endregion lab3
     }
 }

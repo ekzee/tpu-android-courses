@@ -26,8 +26,6 @@ import ru.tpu.courses.lab4.Lab4Activity;
  * <li>Вёрстка UI. Сохранение состояния</li>
  * <li>RecyclerView, взаимодействие между экранами. Memory Cache</li>
  * <li>Взаимодействие с файловой системой, SQLite</li>
- * <li>Запросы к сети, многопоточность</li>
- * <li>Render Loop, Canvas, анимации</li>
  * </ul>
  * P.S. Читать JavaDoc в студии удобнее, нажимая Ctrl+Q
  */

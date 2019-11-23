@@ -3,12 +3,10 @@ package ru.tpu.courses.lab4.add;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -18,15 +16,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
-import androidx.exifinterface.media.ExifInterface;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 import ru.tpu.courses.lab4.Const;
 import ru.tpu.courses.lab4.R;
@@ -34,6 +26,13 @@ import ru.tpu.courses.lab4.db.Lab4Database;
 import ru.tpu.courses.lab4.db.Student;
 import ru.tpu.courses.lab4.db.StudentDao;
 
+/**
+ * Аналогичный экран ввода информации о студенте, как и в lab3. Но теперь введенная информация
+ * сохраняется в {@link android.content.SharedPreferences} (см {@link TempStudentPref}), что
+ * позволяет восстановить введенную информацию после ухода и возвращения на экран. Также теперь
+ * можно добавить фотографию через приложение камеры. Для работы с картинками см
+ * {@link BitmapProcessor}.
+ */
 public class AddStudentActivity extends AppCompatActivity {
 
     private static final String EXTRA_STUDENT = "student";
@@ -48,7 +47,10 @@ public class AddStudentActivity extends AppCompatActivity {
         return intent.getParcelableExtra(EXTRA_STUDENT);
     }
 
+    private StudentDao studentDao;
+
     private TempStudentPref studentPref;
+    private BitmapProcessor bitmapProcessor;
 
     private EditText firstName;
     private EditText secondName;
@@ -65,6 +67,8 @@ public class AddStudentActivity extends AppCompatActivity {
         setContentView(R.layout.lab4_activity_add_student);
 
         studentPref = new TempStudentPref(this);
+        bitmapProcessor = new BitmapProcessor(this);
+        studentDao = Lab4Database.getInstance(this).studentDao();
 
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -109,48 +113,12 @@ public class AddStudentActivity extends AppCompatActivity {
             return true;
         }
         if (item.getItemId() == R.id.action_save) {
-            Student student = new Student(
-                    firstName.getText().toString(),
-                    secondName.getText().toString(),
-                    lastName.getText().toString(),
-                    photoPath
-            );
-
-            StudentDao studentDao = Lab4Database.getInstance(this).studentDao();
-
-            if (studentDao.count(student.firstName, student.secondName, student.lastName) > 0) {
-                Toast.makeText(this, R.string.lab4_error_already_exists, Toast.LENGTH_LONG).show();
-                return true;
-            }
-
-            skipSaveToPrefs = true;
-
-            studentPref.clear();
-
-            Intent data = new Intent();
-            data.putExtra(EXTRA_STUDENT, student);
-            setResult(RESULT_OK, data);
-            finish();
+            saveStudent();
             return true;
         }
+
         if (item.getItemId() == R.id.action_add_photo) {
-            try {
-                File tempFile = createTempFile();
-                photoPath = tempFile.getPath();
-                Uri photoUri = FileProvider.getUriForFile(
-                        this,
-                        Const.FILE_PROVIDER_AUTHORITY,
-                        tempFile
-                );
-                Intent requestPhotoIntent = requestPhotoIntent(photoUri);
-                startActivityForResult(requestPhotoIntent, REQUEST_CAMERA);
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(this,
-                        "Не удалось создать файл для фотографии", Toast.LENGTH_SHORT
-                ).show();
-                photoPath = null;
-            }
+            requestPhotoFromCamera();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -159,9 +127,9 @@ public class AddStudentActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
             try {
-                Bitmap scaledPhoto = getScaledBitmap(photoPath, 512, 512);
-                scaledPhoto = rotateBitmapIfNeed(scaledPhoto, photoPath);
-                saveBitmapToFile(scaledPhoto, photoPath);
+                Bitmap scaledPhoto = bitmapProcessor.readScaledBitmap(photoPath, 512, 512);
+                scaledPhoto = bitmapProcessor.rotateBitmapIfNeed(scaledPhoto, photoPath);
+                bitmapProcessor.saveBitmapToFile(scaledPhoto, photoPath);
 
                 photo.setImageURI(Uri.parse(photoPath));
             } catch (IOException e) {
@@ -181,77 +149,62 @@ public class AddStudentActivity extends AppCompatActivity {
         return intent;
     }
 
-    private File createTempFile() throws IOException {
-        String fileName = new SimpleDateFormat(
-                "yyyyMMdd_HHmmss",
-                Locale.getDefault()
-        ).format(new Date());
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        return File.createTempFile(
-                fileName,
-                ".jpg",
-                storageDir
-        );
-    }
-
-    private Bitmap getScaledBitmap(String filePath, int maxWidth, int maxHeight) {
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(filePath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        float scaleFactor = Math.max(photoW / maxWidth, photoH / maxHeight);
-        if (scaleFactor < 1) {
-            scaleFactor = 1;
-        }
-
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = (int) scaleFactor;
-
-        return BitmapFactory.decodeFile(filePath, bmOptions);
-    }
-
-    private void saveBitmapToFile(Bitmap bitmap, String filePath) throws IOException {
-        File file = new File(filePath);
-        OutputStream fOut = null;
+    private void requestPhotoFromCamera() {
         try {
-            fOut = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut);
-        } finally {
-            if (fOut != null) {
-                fOut.close();
+            if (!TextUtils.isEmpty(photoPath)) {
+                new File(photoPath).delete();
             }
+            File tempFile = bitmapProcessor.createTempFile();
+            photoPath = tempFile.getPath();
+            Uri photoUri = FileProvider.getUriForFile(
+                    this,
+                    Const.FILE_PROVIDER_AUTHORITY,
+                    tempFile
+            );
+            Intent requestPhotoIntent = requestPhotoIntent(photoUri);
+            startActivityForResult(requestPhotoIntent, REQUEST_CAMERA);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this,
+                    "Не удалось создать файл для фотографии", Toast.LENGTH_SHORT
+            ).show();
+            photoPath = null;
         }
     }
 
-    private Bitmap rotateBitmapIfNeed(Bitmap bitmap, String filePath) throws IOException {
-        ExifInterface exif = new ExifInterface(filePath);
-        int orientation = exif.getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_NORMAL
+    private void saveStudent() {
+        Student student = new Student(
+                firstName.getText().toString(),
+                secondName.getText().toString(),
+                lastName.getText().toString(),
+                photoPath
         );
-        int rotateBy = 0;
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                rotateBy = 90;
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                rotateBy = 180;
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                rotateBy = 270;
-                break;
+
+        // Проверяем, что все поля были указаны
+        if (TextUtils.isEmpty(student.firstName) ||
+                TextUtils.isEmpty(student.secondName) ||
+                TextUtils.isEmpty(student.lastName)) {
+            // Класс Toast позволяет показать системное уведомление поверх всего UI
+            Toast.makeText(this, R.string.lab4_error_empty_fields, Toast.LENGTH_LONG).show();
+            return;
         }
-        if (rotateBy == 0) {
-            return bitmap;
+
+        if (studentDao.count(student.firstName, student.secondName, student.lastName) > 0) {
+            Toast.makeText(
+                    this,
+                    R.string.lab4_error_already_exists,
+                    Toast.LENGTH_LONG
+            ).show();
+            return;
         }
-        Matrix matrix = new Matrix();
-        matrix.postRotate(rotateBy);
-        Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0,
-                bitmap.getWidth(), bitmap.getHeight(), matrix, true
-        );
-        bitmap.recycle();
-        return newBitmap;
+
+        skipSaveToPrefs = true;
+
+        studentPref.clear();
+
+        Intent data = new Intent();
+        data.putExtra(EXTRA_STUDENT, student);
+        setResult(RESULT_OK, data);
+        finish();
     }
 }

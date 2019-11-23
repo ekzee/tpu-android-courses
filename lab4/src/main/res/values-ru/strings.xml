@@ -8,5 +8,6 @@
     <string name="lab4_action_add_photo">Добавить фото</string>
     <string name="lab4_action_save">Сохранить</string>
 
+    <string name="lab4_error_empty_fields">Все поля должны быть заполнены</string>
     <string name="lab4_error_already_exists">Такой студент уже существует</string>
 </resources>

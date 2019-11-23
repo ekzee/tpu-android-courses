@@ -8,5 +8,7 @@
     <string name="lab4_action_save">Save</string>
     <string name="lab4_action_add_photo">Add photo</string>
 
+
+    <string name="lab4_error_empty_fields">All fields must not be empty</string>
     <string name="lab4_error_already_exists">The student already exists</string>
 </resources>
