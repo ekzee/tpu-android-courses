@@ -1,2 +1,2 @@
-include ':app', ':lab1', ':lab2', ':lab3', ':lab4'
+include ':app', ':lab1', ':lab2', ':lab3', ':lab4', ':lab5'
 rootProject.name='TPU Android'
