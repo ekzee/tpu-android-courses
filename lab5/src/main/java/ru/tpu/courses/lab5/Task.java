@@ -7,9 +7,26 @@ import android.os.Process;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
+/**
+ * Базовый класс для выполнения задачи на фоновом потоке и корректной нотификации UI потока о статусе
+ * её выполнения.
+ *
+ * @param <T> тип возвращаемых задачей данных.
+ */
 public abstract class Task<T> implements Runnable {
 
     private Observer<T> observer;
+    /**
+     * <p>
+     * {@link Looper} - класс, который в бесконечном цикле выполняет сообщения из очереди. UI поток
+     * имеет свой {@link Looper} и рендер UI и обработка пользовательских действий обрабатываются
+     * через эту очередь.
+     * </p>
+     * <p>
+     * Класс {@link Handler} синхронизирован и может использоваться безопасно из любых потоков для
+     * добавления сообщений в очередь указанному {@link Looper}.
+     * </p>
+     */
     private Handler mainHandler = new Handler(Looper.getMainLooper());
 
     public Task(@Nullable Observer<T> observer) {
@@ -18,7 +35,9 @@ public abstract class Task<T> implements Runnable {
 
     @Override
     public final void run() {
+        // Устанавливаем низкий приоритет потоку, чтобы не нагружать цпу
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        // Через метод post сообщаем через обсервер статусы выполнения задачи
         mainHandler.post(() -> {
             if (observer != null) {
                 observer.onLoading(Task.this);
@@ -44,7 +63,11 @@ public abstract class Task<T> implements Runnable {
     @WorkerThread
     protected abstract T executeInBackground() throws Exception;
 
-    public void unregisterObserver() {
+    /**
+     * Зануляем обсервер, чтобы не создать утечку памяти (т.к. observer потенциально держит ссылку
+     * на Activity)
+     */
+    public final void unregisterObserver() {
         observer = null;
     }
 }

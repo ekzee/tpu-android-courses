@@ -1,2 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ru.tpu.courses.lab5" />
+    package="ru.tpu.courses.lab5">
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application>
+        <activity android:name=".Lab5Activity" />
+    </application>
+</manifest>
